@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load form_filters %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm p-4">
+        <h3 class="mb-4 text-center">Update Transaction</h3>
+
+        <form method="post" id="transaction-form">
+            {% csrf_token %}
+
+            <!-- Status -->
+            <div class="mb-3">
+                {{ form.status.label_tag }}
+                {{ form.status|add_class:"form-select" }}
+            </div>
+
+            <!-- Transaction Type -->
+            <div class="mb-3">
+                {{ form.transaction_type.label_tag }}
+                {{ form.transaction_type|add_class:"form-select" }}
+            </div>
+
+            <!-- Category -->
+            <div class="mb-3" id="category-wrapper">
+                {{ form.category.label_tag }}
+                {{ form.category|add_class:"form-select" }}
+            </div>
+
+            <!-- SubCategory -->
+            <div class="mb-3" id="subcategory-wrapper">
+                {{ form.sub_category.label_tag }}
+                {{ form.sub_category|add_class:"form-select" }}
+            </div>
+
+            <!-- Amount -->
+            <div class="mb-3">
+                {{ form.amount.label_tag }}
+                {{ form.amount|add_class:"form-control" }}
+            </div>
+
+            <!-- Comment -->
+            <div class="mb-3">
+                {{ form.comment.label_tag }}
+                {{ form.comment|add_class:"form-control" }}
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'transaction:main' %}" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const transactionType = document.getElementById("id_transaction_type");
+    const category = document.getElementById("id_category");
+    const subcategory = document.getElementById("id_sub_category");
+
+    const categoryWrapper = document.getElementById("category-wrapper");
+    const subcategoryWrapper = document.getElementById("subcategory-wrapper");
+
+    const initialType = transactionType.value;
+    const initialCategory = category.value;
+
+    // При загрузке — если выбран тип, покажи категории
+    if (initialType) {
+        categoryWrapper.classList.remove("d-none");
+    }
+    if (initialCategory) {
+        subcategoryWrapper.classList.remove("d-none");
+    }
+
+    transactionType.addEventListener("change", function () {
+        const typeId = this.value;
+
+        if (!typeId) {
+            category.innerHTML = '<option value="">Select category...</option>';
+            subcategory.innerHTML = '<option value="">Select subcategory...</option>';
+            categoryWrapper.classList.add("d-none");
+            subcategoryWrapper.classList.add("d-none");
+            return;
+        }
+
+        fetch("{% url 'transaction:ajax_load_categories' %}?type_id=" + typeId)
+            .then(res => res.json())
+            .then(data => {
+                category.innerHTML = '<option value="">Select category...</option>';
+                data.forEach(item => {
+                    category.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+                });
+                categoryWrapper.classList.remove("d-none");
+                subcategoryWrapper.classList.add("d-none");
+            });
+    });
+
+    category.addEventListener("change", function () {
+        const categoryId = this.value;
+
+        if (!categoryId) {
+            subcategoryWrapper.classList.add("d-none");
+            subcategory.innerHTML = '<option value="">Select subcategory...</option>';
+            return;
+        }
+
+        fetch("{% url 'transaction:ajax_load_subcategories' %}?category_id=" + categoryId)
+            .then(res => res.json())
+            .then(data => {
+                subcategory.innerHTML = '<option value="">Select subcategory...</option>';
+                data.forEach(item => {
+                    subcategory.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+                });
+                subcategoryWrapper.classList.remove("d-none");
+            });
+    });
+});
+</script>
+{% endblock %}

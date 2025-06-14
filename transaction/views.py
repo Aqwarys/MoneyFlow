@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 
 from .models import Transaction, Category, TransactionType, SubCategory
-from .forms import TransactionAddForm
+from .forms import TransactionForm
 
 
 @login_required(login_url='user:login')
@@ -16,10 +17,10 @@ def index(request):
 
 
 def create_transaction(request):
-    form = TransactionAddForm()
+    form = TransactionForm()
 
     if request.method == "POST":
-        form = TransactionAddForm(request.POST)
+        form = TransactionForm(request.POST)
         if form.is_valid():
             transaction = form.save(commit=False)
             transaction.user = request.user
@@ -40,3 +41,22 @@ def load_subcategories(request):
     category_id = request.GET.get('category_id')
     subcategories = SubCategory.objects.filter(category_id=category_id).values('id', 'name')
     return JsonResponse(list(subcategories), safe=False)
+
+@login_required(login_url='user:login')
+def update_transaction(request, pk):
+    instance = get_object_or_404(Transaction, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        form = TransactionForm(request.POST, instance=instance)
+        if form.is_valid():
+            form = form.save(commit=False)
+            form.user = request.user
+            form.save()
+            return redirect(reverse_lazy('transaction:main'))
+    else:
+        form = TransactionForm(instance=instance)
+    context = {
+        'form': form
+    }
+
+    return render(request, 'transaction/update_transaction.html', context=context)
