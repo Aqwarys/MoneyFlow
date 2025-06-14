@@ -1,1 +1,55 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Transactions{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Transaction Dashboard</h2>
+
+    {% if transactions %}
+        <div class="table-responsive shadow rounded">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ transaction.status }}</td>
+                        <td>
+                            {% if transaction.amount > 0 %}
+                                <span class="text-success">+${{ transaction.amount }}</span>
+                            {% else %}
+                                <span class="text-danger">${{ transaction.amount }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ transaction.created_at|date:"M d, Y" }}</td>
+                        <td>{{ transaction.category.name }}</td>
+                        <td>
+                            {% if transaction.amount > 0 %}
+                                <span class="badge bg-success">Income</span>
+                            {% else %}
+                                <span class="badge bg-danger">Expense</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            You have no transactions yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

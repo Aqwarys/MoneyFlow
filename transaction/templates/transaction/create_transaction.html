@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% load form_filters %}
+
+
+{% block content %}
+<div class="container mt-5">
+    <h3 class="mb-4">Create Transaction</h3>
+    <form method="post" id="transaction-form">
+        {% csrf_token %}
+
+        <!-- Status -->
+        <div class="mb-3">
+            {{ form.status.label_tag }}
+            {{ form.status|add_class:"form-select" }}
+        </div>
+
+        <!-- Transaction Type -->
+        <div class="mb-3">
+            {{ form.transaction_type.label_tag }}
+            {{ form.transaction_type|add_class:"form-select" }}
+        </div>
+
+        <!-- Category -->
+        <div class="mb-3 d-none" id="category-wrapper">
+            {{ form.category.label_tag }}
+            {{ form.category|add_class:"form-select" }}
+        </div>
+
+        <!-- SubCategory -->
+        <div class="mb-3 d-none" id="subcategory-wrapper">
+            {{ form.sub_category.label_tag }}
+            {{ form.sub_category|add_class:"form-select" }}
+        </div>
+
+        <!-- Amount -->
+        <div class="mb-3">
+            {{ form.amount.label_tag }}
+            {{ form.amount|add_class:"form-control" }}
+        </div>
+
+        <!-- Comment -->
+        <div class="mb-3">
+            {{ form.comment.label_tag }}
+            {{ form.comment|add_class:"form-control" }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Save Transaction</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const transactionType = document.getElementById("id_transaction_type");
+    const category = document.getElementById("id_category");
+    const subcategory = document.getElementById("id_sub_category");
+
+    const categoryWrapper = document.getElementById("category-wrapper");
+    const subcategoryWrapper = document.getElementById("subcategory-wrapper");
+
+    transactionType.addEventListener("change", function () {
+        const typeId = this.value;
+        if (!typeId) {
+            categoryWrapper.classList.add("d-none");
+            subcategoryWrapper.classList.add("d-none");
+            return;
+        }
+
+        fetch(`/ajax/load-categories/?type_id=${typeId}`)
+            .then(response => response.json())
+            .then(data => {
+                category.innerHTML = '<option value="">Select category...</option>';
+                data.forEach(item => {
+                    category.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+                });
+                categoryWrapper.classList.remove("d-none");
+                subcategoryWrapper.classList.add("d-none");
+            });
+    });
+
+    category.addEventListener("change", function () {
+        const categoryId = this.value;
+        if (!categoryId) {
+            subcategoryWrapper.classList.add("d-none");
+            return;
+        }
+
+        fetch(`/ajax/load-subcategories/?category_id=${categoryId}`)
+            .then(response => response.json())
+            .then(data => {
+                subcategory.innerHTML = '<option value="">Select subcategory...</option>';
+                data.forEach(item => {
+                    subcategory.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+                });
+                subcategoryWrapper.classList.remove("d-none");
+            });
+    });
+});
+</script>
+{% endblock %}
