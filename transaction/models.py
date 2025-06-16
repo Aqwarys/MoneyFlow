@@ -2,6 +2,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models import Sum
 
 from dateutil.relativedelta import relativedelta
 
@@ -118,21 +119,15 @@ class Transaction(models.Model):
 
 
     def monthly_expenses(self, request):
-        try:
-            transactions = Transaction.objects.filter(user=request.user, transaction_type__is_expense=True, date__gte=subtract_month())
-        except:
-            return 0
-        result = 0
-        for transaction in transactions:
-            result += transaction.amount
-        return result
+        return (
+            Transaction.objects
+            .filter(user=request.user, transaction_type__is_expense=True, date__gte=subtract_month())
+            .aggregate(total=Sum('amount'))['total'] or 0
+        )
 
     def monthly_income(self, request):
-        try:
-            transactions = Transaction.objects.filter(user=request.user, transaction_type__is_expense=False, date__gte=subtract_month())
-        except:
-            return 0
-        result = 0
-        for transaction in transactions:
-            result += transaction.amount
-        return result
+        return (
+            Transaction.objects
+            .filter(user=request.user, transaction_type__is_expense=False, date__gte=subtract_month())
+            .aggregate(total=Sum('amount'))['total'] or 0
+        )
