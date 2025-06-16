@@ -1,55 +1,96 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}My Transactions{% endblock title %}
+{% block title %}All Transactions{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <h2 class="mb-4 text-center">Transaction Dashboard</h2>
+<div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-semibold">All Transactions</h2>
+        <a href="{% url 'transaction:create' %}" class="btn btn-success">+ Add Transaction</a>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="get" class="row g-3 mb-4 align-items-end">
+        <div class="col-md-3">
+            {{ filter.form.date.label_tag }}
+            {{ filter.form.date }}
+        </div>
+        <div class="col-md-3">
+            {{ filter.form.status.label_tag }}
+            {{ filter.form.status }}
+        </div>
+        <div class="col-md-3">
+            {{ filter.form.category.label_tag }}
+            {{ filter.form.category }}
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary w-100">Apply</button>
+            <a href="{% url 'transaction:main' %}" class="btn btn-outline-secondary w-100">Reset</a>
+        </div>
+    </form>
 
     {% if transactions %}
-        <div class="table-responsive shadow rounded">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Amount</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Category</th>
-                        <th scope="col">Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in transactions %}
-                    <tr>
-                        <th scope="row">{{ forloop.counter }}</th>
-                        <td>{{ transaction.status }}</td>
-                        <td>
-                            {% if transaction.amount > 0 %}
-                                <span class="text-success">+${{ transaction.amount }}</span>
-                            {% else %}
-                                <span class="text-danger">${{ transaction.amount }}</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ transaction.created_at|date:"M d, Y" }}</td>
-                        <td>{{ transaction.category.name }}</td>
-                        <td>
-                            {% if transaction.amount > 0 %}
-                                <span class="badge bg-success">Income</span>
-                            {% else %}
-                                <span class="badge bg-danger">Expense</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive shadow rounded">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Subcategory</th>
+                    <th>Amount</th>
+                    <th>Comment</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ transaction.date|date:"d M Y" }}</td>
+                    <td>{{ transaction.status }}</td>
+                    <td>{{ transaction.transaction_type }}</td>
+                    <td>{{ transaction.category.name }}</td>
+                    <td>{{ transaction.sub_category.name }}</td>
+                    <td class="{% if not transaction.transaction_type.is_expense %}text-success{% else %}text-danger{% endif %}">
+                        ${{ transaction.amount }}
+                    </td>
+                    <td>{{ transaction.comment|default:"—" }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'transaction:update' transaction.id %}"
+                        class="btn btn-icon btn-sm btn-light text-primary border border-primary-subtle me-1"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+
+                        <a href="{% url 'transaction:delete' transaction.id %}"
+                        class="btn btn-icon btn-sm btn-light text-danger border border-danger-subtle"
+                        onclick="return confirm('Are you sure you want to delete this transaction?');"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                            <i class="bi bi-trash3-fill"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-        <div class="alert alert-info text-center">
-            You have no transactions yet.
-        </div>
+    <div class="alert alert-info mt-4 text-center">
+        No transactions found for the selected filters.
+    </div>
     {% endif %}
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
+
 {% endblock %}

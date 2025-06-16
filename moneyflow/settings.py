@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     # 3rd library
     'widget_tweaks',
+    'django_filters',
     # apps
     'transaction.apps.TransactionConfig',
     'user.apps.UserConfig',

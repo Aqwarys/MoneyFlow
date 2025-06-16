@@ -6,6 +6,7 @@ from django.contrib.auth.views import LogoutView
 from django.contrib.auth.decorators import login_required
 
 
+from transaction.models import Transaction
 from .models import User
 from .forms import UserRegistrationForm, UserLoginForm
 
@@ -13,8 +14,13 @@ from .forms import UserRegistrationForm, UserLoginForm
 @login_required(login_url='user:login')
 def profile(request):
     profile = request.user
+    expenses = Transaction().monthly_expenses(request)
+    income = Transaction().monthly_income(request)
+    print(expenses)
     context = {
-        'profile': profile
+        'profile': profile,
+        'monthly_expenses': expenses,
+        'monthly_income': income,
     }
     return render(request, 'user/profile.html', context=context)
 

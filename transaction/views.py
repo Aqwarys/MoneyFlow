@@ -5,13 +5,16 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Transaction, Category, TransactionType, SubCategory
 from .forms import TransactionForm
+from .filters import TransactionFilter
 
 
 @login_required(login_url='user:login')
 def index(request):
-    transactions = Transaction.objects.filter(user=request.user)
+    transactions = Transaction.objects.filter(user=request.user).order_by('-date')
+    filterset = TransactionFilter(request.GET, queryset=transactions)
     context = {
-        'transactions': transactions
+        'filter': filterset,
+        'transactions': filterset.qs
     }
     return render(request, 'transaction/main.html', context=context)
 
@@ -60,3 +63,10 @@ def update_transaction(request, pk):
     }
 
     return render(request, 'transaction/update_transaction.html', context=context)
+
+
+@login_required(login_url='user:login')
+def delete_transaction(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
+    transaction.delete()
+    return redirect('transaction:main')

@@ -1,9 +1,15 @@
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+
+from dateutil.relativedelta import relativedelta
+
 
 from user.models import User
 
+def subtract_month():
+    return timezone.now().date() - relativedelta(months=1)
 
 class Status(models.Model):
     name = models.CharField(max_length=100)
@@ -18,6 +24,7 @@ class Status(models.Model):
 
 class TransactionType(models.Model):
     name = models.CharField(max_length=100)
+    is_expense = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
         return self.name
@@ -72,14 +79,14 @@ class Transaction(models.Model):
     sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=False, blank=False)
     amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, blank=False)
     comment = models.CharField(max_length=500, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    date = models.DateField(auto_now_add=False, editable=True, default=timezone.now().date)
 
     class Meta:
         ordering = [
             'status',
             'transaction_type',
             'category',
-            'created_at',
+            'date',
         ]
         indexes = [
             models.Index(fields=['id']),
@@ -108,3 +115,24 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.created_at} | ${self.amount}"
+
+
+    def monthly_expenses(self, request):
+        try:
+            transactions = Transaction.objects.filter(user=request.user, transaction_type__is_expense=True, date__gte=subtract_month())
+        except:
+            return 0
+        result = 0
+        for transaction in transactions:
+            result += transaction.amount
+        return result
+
+    def monthly_income(self, request):
+        try:
+            transactions = Transaction.objects.filter(user=request.user, transaction_type__is_expense=False, date__gte=subtract_month())
+        except:
+            return 0
+        result = 0
+        for transaction in transactions:
+            result += transaction.amount
+        return result

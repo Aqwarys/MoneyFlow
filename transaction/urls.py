@@ -5,10 +5,11 @@ from . import views
 app_name = 'transaction'
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name="transaction:main", permanent=True)),
-    path('dashboard/', views.index, name='main'),
+    path('main/', views.index, name='main'),
     path('create/', views.create_transaction, name='create'),
     path('create/', views.create_transaction, name='create'),
     path('update/<int:pk>', views.update_transaction, name='update'),
+    path('delete/<int:pk>', views.delete_transaction, name='delete'),
 
     #ajax
     path('ajax/load-categories/', views.load_categories, name='ajax_load_categories'),

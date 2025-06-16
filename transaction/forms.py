@@ -5,7 +5,10 @@ from .models import Transaction
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ['status', 'transaction_type', 'category', 'sub_category', 'amount', 'comment']
+        fields = ['status', 'transaction_type', 'category', 'sub_category', 'amount', 'comment', 'date']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super(TransactionForm, self).__init__(*args, **kwargs)
