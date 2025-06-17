@@ -84,25 +84,25 @@ def create_utils(request):
             status_form = StatusForm(request.POST, prefix='status')
             if status_form.is_valid():
                 status_form.save()
-                return redirect('transaction:create_utils')
+                return redirect('transaction:utils')
 
         elif 'submit_type' in request.POST:
             type_form = TransactionTypeForm(request.POST, prefix='type')
             if type_form.is_valid():
                 type_form.save()
-                return redirect('transaction:create_utils')
+                return redirect('transaction:utils')
 
         elif 'submit_category' in request.POST:
             category_form = CategoryForm(request.POST, prefix='category')
             if category_form.is_valid():
                 category_form.save()
-                return redirect('transaction:create_utils')
+                return redirect('transaction:utils')
 
         elif 'submit_subcategory' in request.POST:
             subcategory_form = SubCategoryForm(request.POST, prefix='subcategory')
             if subcategory_form.is_valid():
                 subcategory_form.save()
-                return redirect('transaction:create_utils')
+                return redirect('transaction:utils')
 
     context = {
         'statusForm': status_form,
@@ -115,4 +115,24 @@ def create_utils(request):
         'subcategories': SubCategory.objects.all(),
     }
 
-    return render(request, 'transaction/create_utils.html', context)
+    return render(request, 'transaction/utils.html', context)
+
+@login_required(login_url='user:login')
+def delete_status(request, pk):
+    get_object_or_404(Status, pk=pk).delete()
+    return redirect('transaction:utils')
+
+@login_required(login_url='user:login')
+def delete_transaction_type(request, pk):
+    get_object_or_404(TransactionType, pk=pk).delete()
+    return redirect('transaction:utils')
+
+@login_required(login_url='user:login')
+def delete_category(request, pk):
+    get_object_or_404(Category, pk=pk).delete()
+    return redirect('transaction:utils')
+
+@login_required(login_url='user:login')
+def delete_subcategory(request, pk):
+    get_object_or_404(SubCategory, pk=pk).delete()
+    return redirect('transaction:utils')

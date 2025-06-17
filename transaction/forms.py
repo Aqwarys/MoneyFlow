@@ -35,7 +35,7 @@ class StatusForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ['name', 'slug', 'transaction_type']
+        fields = ['name', 'transaction_type']
 
 class SubCategoryForm(forms.ModelForm):
     class Meta:

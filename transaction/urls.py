@@ -10,9 +10,14 @@ urlpatterns = [
     path('create/', views.create_transaction, name='create'),
     path('update/<int:pk>', views.update_transaction, name='update'),
     path('delete/<int:pk>', views.delete_transaction, name='delete'),
-    path('utils/', views.create_utils, name='create_utils'),
+    # Utils
+    path('utils/', views.create_utils, name='utils'),
+    path('utils/status/delete/<int:pk>/', views.delete_status, name='delete_status'),
+    path('utils/type/delete/<int:pk>/', views.delete_transaction_type, name='delete_transaction_type'),
+    path('utils/category/delete/<int:pk>/', views.delete_category, name='delete_category'),
+    path('utils/subcategory/delete/<int:pk>/', views.delete_subcategory, name='delete_subcategory'),
 
-    #ajax
+    # ajax
     path('ajax/load-categories/', views.load_categories, name='ajax_load_categories'),
     path('ajax/load-subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
 ]
