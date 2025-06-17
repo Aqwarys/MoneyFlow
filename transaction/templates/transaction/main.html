@@ -24,6 +24,10 @@
             {{ filter.form.category.label_tag }}
             {{ filter.form.category }}
         </div>
+        <div class="col-md-3">
+            {{ filter.form.sub_category.label_tag }}
+            {{ filter.form.sub_category }}
+        </div>
         <div class="col-md-3 d-flex gap-2">
             <button type="submit" class="btn btn-outline-primary w-100">Apply</button>
             <a href="{% url 'transaction:main' %}" class="btn btn-outline-secondary w-100">Reset</a>

@@ -1,6 +1,6 @@
 import django_filters
 from django import forms
-from .models import Transaction, Status, Category
+from .models import Transaction, Status, Category, SubCategory
 
 class TransactionFilter(django_filters.FilterSet):
     date = django_filters.DateFromToRangeFilter(
@@ -16,7 +16,11 @@ class TransactionFilter(django_filters.FilterSet):
         queryset=Category.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    sub_category = django_filters.ModelChoiceFilter(
+        queryset=SubCategory.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
     class Meta:
         model = Transaction
-        fields = ['date', 'status', 'category']
+        fields = ['date', 'status', 'category', 'sub_category']
