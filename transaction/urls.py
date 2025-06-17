@@ -10,6 +10,7 @@ urlpatterns = [
     path('create/', views.create_transaction, name='create'),
     path('update/<int:pk>', views.update_transaction, name='update'),
     path('delete/<int:pk>', views.delete_transaction, name='delete'),
+    path('utils/', views.create_utils, name='create_utils'),
 
     #ajax
     path('ajax/load-categories/', views.load_categories, name='ajax_load_categories'),

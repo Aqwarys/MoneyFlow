@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.views.generic import CreateView
 
-from .models import Transaction, Category, TransactionType, SubCategory
-from .forms import TransactionForm
+from .models import Transaction, Category, TransactionType, SubCategory, Status
+from .forms import TransactionForm, StatusForm, TransactionTypeForm, CategoryForm, SubCategoryForm
 from .filters import TransactionFilter
 
 
@@ -70,3 +71,48 @@ def delete_transaction(request, pk):
     transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
     transaction.delete()
     return redirect('transaction:main')
+
+@login_required(login_url='user:login')
+def create_utils(request):
+    status_form = StatusForm(prefix='status')
+    type_form = TransactionTypeForm(prefix='type')
+    category_form = CategoryForm(prefix='category')
+    subcategory_form = SubCategoryForm(prefix='subcategory')
+
+    if request.method == 'POST':
+        if 'submit_status' in request.POST:
+            status_form = StatusForm(request.POST, prefix='status')
+            if status_form.is_valid():
+                status_form.save()
+                return redirect('transaction:create_utils')
+
+        elif 'submit_type' in request.POST:
+            type_form = TransactionTypeForm(request.POST, prefix='type')
+            if type_form.is_valid():
+                type_form.save()
+                return redirect('transaction:create_utils')
+
+        elif 'submit_category' in request.POST:
+            category_form = CategoryForm(request.POST, prefix='category')
+            if category_form.is_valid():
+                category_form.save()
+                return redirect('transaction:create_utils')
+
+        elif 'submit_subcategory' in request.POST:
+            subcategory_form = SubCategoryForm(request.POST, prefix='subcategory')
+            if subcategory_form.is_valid():
+                subcategory_form.save()
+                return redirect('transaction:create_utils')
+
+    context = {
+        'statusForm': status_form,
+        'typeForm': type_form,
+        'categoryForm': category_form,
+        'subcategoryForm': subcategory_form,
+        'statuses': Status.objects.all(),
+        'transactiontypes': TransactionType.objects.all(),
+        'categories': Category.objects.all(),
+        'subcategories': SubCategory.objects.all(),
+    }
+
+    return render(request, 'transaction/create_utils.html', context)
