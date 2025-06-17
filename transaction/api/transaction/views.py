@@ -78,7 +78,10 @@ class TransactionAPIViewSet(ModelViewSet):
 
 
     def get_queryset(self):
-        return Transaction.objects.filter(user=self.request.user).order_by('-date')
+        if self.request.user.is_authenticated:
+            return Transaction.objects.filter(user=self.request.user).order_by('-date')
+        return Transaction.objects.none()
+
 
     @action(methods=['get'], detail=True)
     def category(self, request, pk=None):
