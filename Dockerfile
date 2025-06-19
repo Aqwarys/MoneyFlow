@@ -8,5 +8,5 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8000
-COPY . .
+COPY ./app .
 CMD ["gunicorn", "moneyflow.wsgi:application", "--bind", "0.0.0.0:8000"]
